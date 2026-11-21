@@ -1,81 +1,100 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
-        <meta name="description" content="删除空格、换行回车符"/>
-        <meta name="keywords" content="删除空格，删除回车，删除换行"/>
-        <title>文本删除空格、回车和换行符</title>
-        <script>
-            function killBr(obj, res) {
-                var c = document.getElementById(obj).value;
-                document.getElementById(res).value = document.getElementById("enTocn").checked ? repSign(iGetInnerText(c)) : iGetInnerText(c);
-            }
-            // killBr
-            function empty(obj) {
-                document.getElementById(obj).value = "";
-            }
-            // empty
-            function iGetInnerText(testStr) {
-                var resultStr = testStr.replace(/\ +/g, "");
-                //去掉空格
-                resultStr = testStr.replace(/<\/?[^>]*>/g, '');
-                //去除HTML tag
-                resultStr = testStr.replace(/&nbsp;/ig, '');
-                //去掉&nbsp;
-                resultStr = testStr.replace(/[ | ]*\n/g, '\n');
-                //去除行尾空白
-                resultStr = testStr.replace(/[ ]/g, "");
-                //去掉空格
-                resultStr = testStr.replace(/[\r\n]/g, "");
-                //去掉回车换行
-                return resultStr;
-            }
-            // iGetInnerText
-            function repSign(s) {
-                s = s.replace(/([\u4E00-\u9FA5]|^|\n|\r)([\,\.\?\!])(?=[\u4E00-\u9FA5]|$|\n|\r)/g, function(u, v, w, x) {
-                    sign = {
-                        ',': '，',
-                        '.': '。',
-                        '?': '？',
-                        '!': '！',
-                        '(': '（',
-                        ')': '）',
-                        ';': '；',
-                        ':': '：'
-                    };
-                    return sign[w] ? v + sign[w] : u;
-                });
-                return s;
-            }
-            function copy() {
-                document.getElementById("result").select();
-                document.execCommand("copy");
-            }
-        </script>
-        <style>
-            #source,#result {
-                width: 98%;
-            }
-        </style>
-    </head>
-    <body>
-        <h3>文本删除空格、回车和换行</h3>
-        <p>原始文本（在此输入需要删除的原始文本）</p>
-        <textarea id="source" rows="15"></textarea>
-        <br/>
-        <p>
-            <a href="javaScript:killBr('source','result')">执行删除</a>
-            |     将英文标点符号转成中文标点符号<input type="checkbox" id="enTocn" checked />
-        </p>
-        <hr/>
-        <p>删除空格、回车后的文本</p>
-        <textarea id="result" rows="15"></textarea>
-        <p>
-            <a href="javaScript:copy();">复制结果</a>
-            |     <a href="javaScript:empty('source');empty('result');">清空原始文本、结果</a>
-        </p>
-        <p>此程序可把文本中的回车符、换行符、空格删除。</p>
-        <p>用途：在pdf中复制的文本，包含很多无用的空格、换行符。可用此程序删除，以得到干净文本。</p>
-    </body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>去除空格与HTML标签工具</title>
+<meta name="description" content="一键去除文本中的空格、回车换行和 HTML 标签，可选英文标点转中文标点。">
+<style>
+:root{
+  --primary:#5b6cff; --primary-d:#4a5bf0; --bg:#eef1f7; --card:#ffffff;
+  --text:#1f2430; --muted:#6b7280; --border:#e2e6ee; --soft:#f4f6fb;
+  --ok:#16a34a; --radius:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:860px;margin:0 auto;padding:28px 18px 60px}
+header{text-align:center;margin-bottom:22px}
+header h1{font-size:26px;margin:0 0 6px;font-weight:700;letter-spacing:.5px}
+header p{color:var(--muted);margin:0;font-size:15px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 24px rgba(30,41,59,.07);padding:22px;margin-bottom:18px}
+label.field{display:block;font-weight:600;margin:0 0 8px;font-size:15px}
+textarea,input[type=text]{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#fcfdff;resize:vertical;outline:none;transition:border .15s,box-shadow .15s}
+textarea:focus,input[type=text]:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(91,108,255,.15)}
+textarea{min-height:180px;line-height:1.7}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s,transform .05s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-d)}
+.btn-ghost{background:#fff;color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--soft)}
+.hint{color:var(--muted);font-size:13.5px;margin-top:10px}
+.output{margin-top:14px}
+.output textarea{min-height:140px;background:var(--soft)}
+.result-num{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px}
+.stat{background:var(--soft);border-radius:10px;padding:10px 16px;min-width:120px}
+.stat b{font-size:22px;color:var(--primary);display:block}
+.stat span{font-size:13px;color:var(--muted)}
+footer{text-align:center;color:var(--muted);font-size:13px;margin-top:30px}
+footer a{color:var(--primary);text-decoration:none}
+#toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%);background:#1f2430;color:#fff;
+  padding:10px 20px;border-radius:10px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:99}
+#toast.show{opacity:.95}
+@media(max-width:600px){header h1{font-size:21px}.wrap{padding:18px 12px 40px}.card{padding:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1>去除空格与HTML标签工具</h1><p>一键去除文本中的空格、回车换行和 HTML 标签，可选英文标点转中文标点。</p></header>
+
+<div class="card">
+  <label class="field" for="in">粘贴 HTML 片段或混杂文字</label>
+  <textarea id="in" placeholder="<p>你好  世界</p>，Hello, world!"></textarea>
+  <div class="row">
+    <label style="display:flex;align-items:center;gap:6px;font-size:15px"><input type="checkbox" id="enTocn" style="width:auto"> 英文标点转中文标点</label>
+  </div>
+  <div class="row">
+    <button class="btn btn-primary" onclick="run()">去除空格与标签</button>
+    <button class="btn btn-ghost" onclick="copyOut()">复制结果</button>
+    <button class="btn btn-ghost" onclick="clearAll()">清空</button>
+  </div>
+  <p class="hint">去除所有空格、回车换行与 HTML 标签，清空 &nbsp;。</p>
+</div>
+<div class="card output">
+  <label class="field" for="out">处理结果</label>
+  <textarea id="out" readonly></textarea>
+</div>
+<script>
+function innerText(s){
+  s=s.replace(/<\/?[^>]*>/g,'');
+  s=s.replace(/&nbsp;/ig,'');
+  s=s.replace(/\s+/g,'');
+  return s;
+}
+function repSign(s){
+  var sign={',':'，','.':'。','?':'？','!':'！','(':'（',')':'）',';':'；',':':'：'};
+  return s.replace(/([,\.\?!\(\);:])/g,function(w){return sign[w]||w;});
+}
+function run(){
+  var c=document.getElementById('in').value;
+  var r=innerText(c);
+  if(document.getElementById('enTocn').checked)r=repSign(r);
+  document.getElementById('out').value=r;
+  toast('处理完成');
+}
+function copyOut(){copyText(document.getElementById('out').value);}
+function clearAll(){document.getElementById('in').value='';document.getElementById('out').value='';}
+</script>
+
+<footer>本工具由 wangchenyu.com 整理开源，纯浏览器本地运行，数据不上传。<br>作者：王尘宇 · <a href="https://wangchenyu.com">wangchenyu.com</a> · <a href="https://gitee.com/iseeyu">Gitee</a></footer>
+</div>
+<div id="toast"></div>
+<script>
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1600);}
+function copyText(txt){if(!txt){toast('没有可复制的内容');return;}navigator.clipboard.writeText(txt).then(()=>toast('已复制到剪贴板')).catch(()=>{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('已复制');});}
+</script>
+</body>
 </html>
